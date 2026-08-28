@@ -1,6 +1,21 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
+import { Platform } from 'react-native';
 
 export const DATABASE_NAME = 'medical_app.db';
+
+/**
+ * WAL mode needs a companion `-wal`/`-shm` file living alongside the main
+ * database file. On native that's a normal filesystem, no problem. On web,
+ * expo-sqlite runs on wa-sqlite's OPFS AccessHandlePoolVFS, which as of
+ * this writing has no working WAL support - setting WAL there either fails
+ * outright or (worse) gets recorded in the database file's own header, so
+ * every future reopen of that file tries to resume WAL and fails at
+ * sqlite3_open_v2 with "cannot create file", even after clearing the
+ * service worker/cache. `MEMORY` avoids touching the OPFS file at all for
+ * the journal and is the workaround the wa-sqlite project itself recommends
+ * for this exact VFS.
+ */
+const JOURNAL_MODE = Platform.OS === 'web' ? 'MEMORY' : 'WAL';
 
 /**
  * Bumped whenever the statements below change, so `migrateDatabase`
@@ -78,7 +93,7 @@ export async function migrateDatabase(db: SQLiteDatabase) {
   }
 
   await db.execAsync(`
-    PRAGMA journal_mode = WAL;
+    PRAGMA journal_mode = ${JOURNAL_MODE};
     ${CREATE_NOTES_TABLE}
     ${CREATE_FLASHCARDS_TABLE}
     ${CREATE_CALCULATORS_TABLE}
