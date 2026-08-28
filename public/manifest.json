@@ -1,0 +1,19 @@
+{
+  "name": "Medical App",
+  "short_name": "MedicalApp",
+  "description": "Notas clínicas, estudio con repetición espaciada, calculadoras y vademécum offline-first para estudiantes de medicina.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#3E5C76",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

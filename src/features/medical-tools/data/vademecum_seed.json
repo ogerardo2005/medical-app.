@@ -1,0 +1,98 @@
+[
+  {
+    "nombre_generico": "Paracetamol",
+    "categoria": "Analgésico / Antipirético",
+    "dosis_adultos": "500-1000 mg VO cada 6-8 h. Dosis máxima 4 g/día (3 g/día en uso crónico o hepatopatía).",
+    "dosis_pediatrica": "10-15 mg/kg/dosis VO cada 4-6 h. Dosis máxima 75 mg/kg/día.",
+    "contraindicaciones": "Insuficiencia hepática grave, hipersensibilidad conocida al paracetamol.",
+    "mecanismo_accion": "Inhibe la síntesis de prostaglandinas predominantemente a nivel central; efecto analgésico y antipirético con escasa actividad antiinflamatoria periférica."
+  },
+  {
+    "nombre_generico": "Ibuprofeno",
+    "categoria": "AINE",
+    "dosis_adultos": "400-600 mg VO cada 6-8 h. Dosis máxima 2400 mg/día.",
+    "dosis_pediatrica": "5-10 mg/kg/dosis VO cada 6-8 h. Dosis máxima 40 mg/kg/día.",
+    "contraindicaciones": "Úlcera péptica activa, insuficiencia renal grave, tercer trimestre del embarazo, hipersensibilidad a AINE.",
+    "mecanismo_accion": "Inhibición no selectiva de la ciclooxigenasa (COX-1 y COX-2), reduciendo la síntesis de prostaglandinas proinflamatorias."
+  },
+  {
+    "nombre_generico": "Omeprazol",
+    "categoria": "Inhibidor de la bomba de protones",
+    "dosis_adultos": "20-40 mg VO/IV cada 24 h.",
+    "dosis_pediatrica": "0.7-3.3 mg/kg/día VO en 1 dosis, bajo indicación especializada.",
+    "contraindicaciones": "Hipersensibilidad a inhibidores de la bomba de protones. Precaución en uso prolongado por riesgo de déficit de B12 y fracturas.",
+    "mecanismo_accion": "Inhibe de forma irreversible la H+/K+-ATPasa de la célula parietal gástrica, bloqueando la secreción ácida."
+  },
+  {
+    "nombre_generico": "Amoxicilina",
+    "categoria": "Antibiótico (betalactámico)",
+    "dosis_adultos": "500-875 mg VO cada 8-12 h.",
+    "dosis_pediatrica": "25-50 mg/kg/día VO dividido cada 8-12 h (hasta 90 mg/kg/día en indicaciones específicas).",
+    "contraindicaciones": "Alergia a penicilinas o betalactámicos, mononucleosis infecciosa (riesgo de exantema).",
+    "mecanismo_accion": "Inhibe la síntesis de la pared celular bacteriana al unirse a las PBP, con actividad bactericida tiempo-dependiente."
+  },
+  {
+    "nombre_generico": "Metformina",
+    "categoria": "Antidiabético oral (biguanida)",
+    "dosis_adultos": "500-850 mg VO cada 12-24 h con las comidas, titulando hasta máx. 2550 mg/día.",
+    "dosis_pediatrica": "No indicada de rutina en <10 años; en ≥10 años, 500 mg VO cada 12-24 h según indicación endocrinológica.",
+    "contraindicaciones": "Insuficiencia renal grave (TFG <30 mL/min), acidosis metabólica, insuficiencia hepática grave, previo a estudios con contraste yodado.",
+    "mecanismo_accion": "Reduce la gluconeogénesis hepática y aumenta la sensibilidad periférica a la insulina; no estimula la secreción pancreática de insulina."
+  },
+  {
+    "nombre_generico": "Losartán",
+    "categoria": "Antihipertensivo (ARA-II)",
+    "dosis_adultos": "50 mg VO cada 24 h, puede aumentarse a 100 mg/día.",
+    "dosis_pediatrica": "0.7 mg/kg VO cada 24 h (máx. 50 mg/día) en ≥6 años, según indicación.",
+    "contraindicaciones": "Embarazo, estenosis bilateral de la arteria renal, hipersensibilidad al fármaco.",
+    "mecanismo_accion": "Bloquea selectivamente el receptor AT1 de angiotensina II, produciendo vasodilatación y reducción de la presión arterial."
+  },
+  {
+    "nombre_generico": "Atorvastatina",
+    "categoria": "Hipolipemiante (estatina)",
+    "dosis_adultos": "10-80 mg VO cada 24 h, habitualmente por la noche.",
+    "dosis_pediatrica": "10 mg VO cada 24 h en ≥10 años con hipercolesterolemia familiar, bajo indicación especializada.",
+    "contraindicaciones": "Enfermedad hepática activa, embarazo y lactancia, hipersensibilidad al fármaco.",
+    "mecanismo_accion": "Inhibe competitivamente la HMG-CoA reductasa, reduciendo la síntesis hepática de colesterol y aumentando los receptores de LDL."
+  },
+  {
+    "nombre_generico": "Salbutamol",
+    "categoria": "Broncodilatador (β2-agonista)",
+    "dosis_adultos": "100-200 mcg (1-2 inhalaciones) cada 4-6 h según necesidad.",
+    "dosis_pediatrica": "100 mcg (1 inhalación) cada 4-6 h según necesidad; nebulizado 0.15 mg/kg/dosis (mín. 2.5 mg).",
+    "contraindicaciones": "Hipersensibilidad a agonistas β2, taquiarritmias no controladas.",
+    "mecanismo_accion": "Estimula los receptores β2-adrenérgicos del músculo liso bronquial, produciendo broncodilatación rápida."
+  },
+  {
+    "nombre_generico": "Metronidazol",
+    "categoria": "Antibiótico / Antiparasitario",
+    "dosis_adultos": "500 mg VO/IV cada 8 h.",
+    "dosis_pediatrica": "7.5 mg/kg/dosis VO/IV cada 8 h.",
+    "contraindicaciones": "Primer trimestre del embarazo, hipersensibilidad a nitroimidazoles, consumo concomitante de alcohol (efecto disulfiram).",
+    "mecanismo_accion": "Se reduce en el interior de microorganismos anaerobios generando metabolitos que dañan el ADN bacteriano/parasitario."
+  },
+  {
+    "nombre_generico": "Enalapril",
+    "categoria": "Antihipertensivo (IECA)",
+    "dosis_adultos": "5-20 mg VO cada 12-24 h.",
+    "dosis_pediatrica": "0.08 mg/kg VO cada 24 h (máx. 5 mg/día inicial), según indicación.",
+    "contraindicaciones": "Embarazo, antecedente de angioedema por IECA, estenosis bilateral de arteria renal.",
+    "mecanismo_accion": "Inhibe la enzima convertidora de angiotensina, disminuyendo la formación de angiotensina II y la degradación de bradicinina."
+  },
+  {
+    "nombre_generico": "Diazepam",
+    "categoria": "Ansiolítico / Anticonvulsivante (benzodiacepina)",
+    "dosis_adultos": "2-10 mg VO/IV cada 6-12 h según indicación (ansiólisis, sedación, crisis convulsiva).",
+    "dosis_pediatrica": "0.1-0.3 mg/kg/dosis IV en crisis convulsiva (máx. 10 mg/dosis).",
+    "contraindicaciones": "Insuficiencia respiratoria grave, miastenia gravis, apnea del sueño, hipersensibilidad a benzodiacepinas.",
+    "mecanismo_accion": "Potencia la acción del GABA sobre el receptor GABA-A, aumentando la apertura del canal de cloro y produciendo depresión del SNC."
+  },
+  {
+    "nombre_generico": "Ondansetrón",
+    "categoria": "Antiemético",
+    "dosis_adultos": "4-8 mg VO/IV cada 8 h según necesidad.",
+    "dosis_pediatrica": "0.1-0.15 mg/kg/dosis IV cada 8 h (máx. 4 mg/dosis).",
+    "contraindicaciones": "Síndrome de QT largo congénito, hipersensibilidad a antagonistas 5-HT3, uso concomitante con apomorfina.",
+    "mecanismo_accion": "Antagonista selectivo de los receptores 5-HT3 a nivel central (zona gatillo quimiorreceptora) y periférico (nervio vago)."
+  }
+]
