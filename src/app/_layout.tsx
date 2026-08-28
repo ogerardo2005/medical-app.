@@ -8,6 +8,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SQLiteProvider, type SQLiteDatabase } from 'expo-sqlite';
 
 import { DATABASE_NAME, migrateDatabase } from '@/db/schema';
+import { DatabaseErrorBoundary } from '@/db/DatabaseErrorBoundary';
+import { DatabaseUnloadHandler } from '@/db/DatabaseUnloadHandler';
 import { seedDatabase } from '@/db/seed';
 import { GuardModeProvider, useGuardMode } from '@/theme/GuardModeContext';
 import { GuardModeOverlay } from '@/theme/GuardModeOverlay';
@@ -31,13 +33,16 @@ function AppShell() {
   return (
     <>
       <StatusBar style={guardMode ? 'light' : 'auto'} />
-      <Suspense fallback={<LoadingFallback />}>
-        <SQLiteProvider databaseName={DATABASE_NAME} onInit={initializeDatabase} useSuspense>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-          </Stack>
-        </SQLiteProvider>
-      </Suspense>
+      <DatabaseErrorBoundary>
+        <Suspense fallback={<LoadingFallback />}>
+          <SQLiteProvider databaseName={DATABASE_NAME} onInit={initializeDatabase} useSuspense>
+            <DatabaseUnloadHandler />
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" />
+            </Stack>
+          </SQLiteProvider>
+        </Suspense>
+      </DatabaseErrorBoundary>
       <GuardModeOverlay />
     </>
   );
