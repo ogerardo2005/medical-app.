@@ -7,8 +7,16 @@
  * - Everything else (the HTML shell, navigations) is network-first, so
  *   online users always get the latest app, falling back to the cached
  *   shell when offline.
+ *
+ * Deliberately does NOT call clients.claim() on activate: doing so makes an
+ * already-loading page's in-flight requests get re-intercepted mid-flight by
+ * the new worker, which raced with the browser's own consumption of those
+ * responses ("Response body is already used") and, worse, could cause the
+ * app's SQLite module to start initializing twice concurrently against the
+ * same OPFS-backed database file. Without clients.claim(), a newly installed
+ * worker only takes over on the *next* navigation/reload - no mid-load race.
  */
-const CACHE_NAME = 'medical-app-cache-v1';
+const CACHE_NAME = 'medical-app-cache-v2';
 const IMMUTABLE_PREFIXES = ['/_expo/static/', '/assets/'];
 
 self.addEventListener('install', () => {
@@ -20,7 +28,6 @@ self.addEventListener('activate', (event) => {
     caches
       .keys()
       .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
-      .then(() => self.clients.claim())
   );
 });
 
@@ -35,25 +42,34 @@ self.addEventListener('fetch', (event) => {
 
   if (isImmutableAsset) {
     event.respondWith(
-      caches.open(CACHE_NAME).then(async (cache) => {
+      (async () => {
+        const cache = await caches.open(CACHE_NAME);
         const cached = await cache.match(request);
         if (cached) return cached;
+
         const response = await fetch(request);
-        if (response.ok) cache.put(request, response.clone());
+        if (response.ok) {
+          cache.put(request, response.clone()).catch(() => {});
+        }
         return response;
-      })
+      })()
     );
     return;
   }
 
   event.respondWith(
-    fetch(request)
-      .then((response) => {
+    (async () => {
+      try {
+        const response = await fetch(request);
         if (response.ok) {
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(request, response.clone()).catch(() => {});
         }
         return response;
-      })
-      .catch(() => caches.match(request).then((cached) => cached || caches.match('/')))
+      } catch {
+        const cached = await caches.match(request);
+        return cached || caches.match('/');
+      }
+    })()
   );
 });
