@@ -16,8 +16,17 @@
  * same OPFS-backed database file. Without clients.claim(), a newly installed
  * worker only takes over on the *next* navigation/reload - no mid-load race.
  */
-const CACHE_NAME = 'medical-app-cache-v2';
+const CACHE_NAME = 'medical-app-cache-v3';
 const IMMUTABLE_PREFIXES = ['/_expo/static/', '/assets/'];
+
+// expo-sqlite's web worker fetches its own wasm module from inside a
+// dedicated Worker context. Letting the service worker intercept that
+// (even just to check the Cache API before falling through to network)
+// changes the timing around wa-sqlite's own OPFS init sequence and was a
+// likely contributor to "Access Handles cannot be created if there is
+// another open Access Handle" - so these bypass the SW entirely and go
+// straight to network, exactly like a page with no service worker at all.
+const SQLITE_BYPASS_PATTERN = /wa-sqlite|\/worker-[a-f0-9]+\.js$/;
 
 self.addEventListener('install', () => {
   self.skipWaiting();
@@ -37,6 +46,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  if (SQLITE_BYPASS_PATTERN.test(url.pathname)) return;
 
   const isImmutableAsset = IMMUTABLE_PREFIXES.some((prefix) => url.pathname.startsWith(prefix));
 
