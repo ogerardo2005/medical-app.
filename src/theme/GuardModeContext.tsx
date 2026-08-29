@@ -1,12 +1,11 @@
-import Storage from 'expo-sqlite/kv-store';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
-import { Platform } from 'react-native';
 
-const GUARD_MODE_KEY = 'settings.guardMode';
+import { useAuth } from '@/features/auth/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 interface GuardModeContextValue {
-  /** Whether the red-light filter is currently on. False until the persisted value loads. */
+  /** Whether the red-light filter is currently on. False until it loads from Supabase. */
   guardMode: boolean;
   setGuardMode: (enabled: boolean) => void;
 }
@@ -14,53 +13,41 @@ interface GuardModeContextValue {
 const GuardModeContext = createContext<GuardModeContextValue | null>(null);
 
 /**
- * On native, expo-sqlite/kv-store is a fine, self-contained place for this.
- * On web it is NOT self-contained: it goes through the exact same
- * openDatabaseAsync() and shared Worker as the app's main SQLiteProvider
- * (both ultimately call the same code in expo-sqlite/build/index). Reading
- * this at startup - which is exactly when GuardModeProvider mounts, right
- * before the main database opens - raced two concurrent "first open" calls
- * through wa-sqlite's OPFS VFS and broke the main database with
- * "Access Handles cannot be created if there is another open Access
- * Handle", even on a completely fresh browser profile. localStorage has no
- * relationship to expo-sqlite at all, so it can't race with it.
+ * Persists the "Modo Guardia" (red-light) preference in the `user_settings`
+ * table, keyed by the signed-in user - so it now follows the user across
+ * every device they log into, same as their notes and flashcards.
  */
-async function readGuardModePreference(): Promise<boolean> {
-  if (Platform.OS === 'web') {
-    try {
-      return window.localStorage.getItem(GUARD_MODE_KEY) === 'true';
-    } catch {
-      return false;
-    }
-  }
-  const stored = await Storage.getItemAsync(GUARD_MODE_KEY);
-  return stored === 'true';
-}
-
-function writeGuardModePreference(enabled: boolean): void {
-  const value = enabled ? 'true' : 'false';
-  if (Platform.OS === 'web') {
-    try {
-      window.localStorage.setItem(GUARD_MODE_KEY, value);
-    } catch {
-      // Ignore (e.g. storage disabled/full) - the in-memory state still updates.
-    }
-    return;
-  }
-  Storage.setItemAsync(GUARD_MODE_KEY, value);
-}
-
 export function GuardModeProvider({ children }: PropsWithChildren) {
+  const { session } = useAuth();
+  const userId = session?.user.id;
   const [guardMode, setGuardModeState] = useState(false);
 
   useEffect(() => {
-    readGuardModePreference().then(setGuardModeState);
-  }, []);
+    if (!userId) return;
+    let cancelled = false;
 
-  const setGuardMode = useCallback((enabled: boolean) => {
-    setGuardModeState(enabled);
-    writeGuardModePreference(enabled);
-  }, []);
+    supabase
+      .from('user_settings')
+      .select('guard_mode')
+      .eq('user_id', userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled && data) setGuardModeState(data.guard_mode);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  const setGuardMode = useCallback(
+    (enabled: boolean) => {
+      setGuardModeState(enabled);
+      if (!userId) return;
+      supabase.from('user_settings').upsert({ user_id: userId, guard_mode: enabled });
+    },
+    [userId]
+  );
 
   return (
     <GuardModeContext.Provider value={{ guardMode, setGuardMode }}>

@@ -1,5 +1,6 @@
 export interface NoteRow {
-  id: number;
+  id: string;
+  user_id: string;
   title: string;
   content: string;
   template_type: string | null;
@@ -9,7 +10,8 @@ export interface NoteRow {
 }
 
 export interface FlashcardRow {
-  id: number;
+  id: string;
+  user_id: string;
   question: string;
   answer: string;
   deck_name: string;
@@ -19,19 +21,17 @@ export interface FlashcardRow {
   next_review: string;
 }
 
-export interface CalculatorRow {
-  id: number;
-  name: string;
-  category: string;
-  formula_data: string;
-}
-
 export interface VademecumRow {
-  id: number;
+  id: string;
   nombre_generico: string;
   categoria: string;
   dosis_adultos: string;
   dosis_pediatrica: string;
   contraindicaciones: string;
   mecanismo_accion: string;
+}
+
+export interface UserSettingsRow {
+  user_id: string;
+  guard_mode: boolean;
 }

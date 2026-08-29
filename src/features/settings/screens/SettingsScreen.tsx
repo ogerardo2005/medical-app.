@@ -1,12 +1,22 @@
-import { Switch, Text, View } from 'react-native';
+import { Alert, Pressable, Switch, Text, View } from 'react-native';
 
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
+import { useAuth } from '@/features/auth/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { palette } from '@/theme/colors';
 import { useGuardMode } from '@/theme/GuardModeContext';
 
 export function SettingsScreen() {
   const { guardMode, setGuardMode } = useGuardMode();
+  const { session } = useAuth();
+
+  const handleSignOut = () => {
+    Alert.alert('Cerrar sesión', '¿Seguro que querés cerrar sesión?', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Cerrar sesión', style: 'destructive', onPress: () => supabase.auth.signOut() },
+    ]);
+  };
 
   return (
     <Screen>
@@ -30,6 +40,20 @@ export function SettingsScreen() {
             thumbColor={palette.white}
           />
         </View>
+      </Card>
+
+      <Card className="mt-3">
+        <Text className="text-sm text-neutral-500 dark:text-neutral-400">Sesión iniciada como</Text>
+        <Text className="mt-1 text-base font-semibold text-black dark:text-white">
+          {session?.user.email}
+        </Text>
+        <Pressable
+          onPress={handleSignOut}
+          className="mt-4 items-center rounded-xl border border-red-300 py-2.5 active:bg-red-50 dark:border-red-800 dark:active:bg-red-950">
+          <Text className="text-base font-semibold text-red-600 dark:text-red-400">
+            Cerrar sesión
+          </Text>
+        </Pressable>
       </Card>
     </Screen>
   );

@@ -1,10 +1,9 @@
-import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 
-import type { VademecumRow } from '@/db/types';
+import { supabase } from '@/lib/supabase';
+import type { VademecumRow } from '@/lib/types';
 
 export function useVademecumEntry(id: string) {
-  const db = useSQLiteContext();
   const [drug, setDrug] = useState<VademecumRow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -12,12 +11,9 @@ export function useVademecumEntry(id: string) {
     let cancelled = false;
 
     async function load() {
-      const row = await db.getFirstAsync<VademecumRow>(
-        'SELECT * FROM vademecum WHERE id = ?',
-        Number(id)
-      );
+      const { data } = await supabase.from('vademecum').select('*').eq('id', id).single();
       if (cancelled) return;
-      setDrug(row);
+      setDrug(data ?? null);
       setIsLoading(false);
     }
 
@@ -25,7 +21,7 @@ export function useVademecumEntry(id: string) {
     return () => {
       cancelled = true;
     };
-  }, [db, id]);
+  }, [id]);
 
   return { drug, isLoading };
 }

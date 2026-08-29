@@ -1,32 +1,37 @@
-import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useState } from 'react';
 
-import type { FlashcardRow } from '@/db/types';
+import { useAuth } from '@/features/auth/AuthContext';
+import { supabase } from '@/lib/supabase';
+import type { FlashcardRow } from '@/lib/types';
 
-import { reviewCard, toSqliteDatetime, type ReviewGrade } from '../lib/sm2';
+import { reviewCard, type ReviewGrade } from '../lib/sm2';
 
 /**
  * Drives one study session: loads every card due right now (next_review <= now),
  * hands them out one at a time, and applies the SM-2 scheduler on each grade.
  * A card graded during the session is simply dropped from the local queue -
  * SM-2 never schedules a card back into "due" the same day it was just reviewed,
- * so there's no need to re-query SQLite between cards.
+ * so there's no need to re-query between cards.
  */
 export function useStudySession() {
-  const db = useSQLiteContext();
+  const { session } = useAuth();
+  const userId = session?.user.id;
   const [queue, setQueue] = useState<FlashcardRow[]>([]);
   const [totalDue, setTotalDue] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadDueCards = useCallback(async () => {
+    if (!userId) return;
     setIsLoading(true);
-    const rows = await db.getAllAsync<FlashcardRow>(
-      "SELECT * FROM flashcards WHERE next_review <= datetime('now') ORDER BY next_review ASC"
-    );
-    setQueue(rows);
-    setTotalDue(rows.length);
+    const { data } = await supabase
+      .from('flashcards')
+      .select('*')
+      .lte('next_review', new Date().toISOString())
+      .order('next_review', { ascending: true });
+    setQueue(data ?? []);
+    setTotalDue(data?.length ?? 0);
     setIsLoading(false);
-  }, [db]);
+  }, [userId]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- initial fetch on mount; setState happens after the `await`, not synchronously in the effect body
@@ -50,18 +55,19 @@ export function useStudySession() {
         reviewGrade
       );
 
-      await db.runAsync(
-        'UPDATE flashcards SET interval = ?, ease_factor = ?, repetitions = ?, next_review = ? WHERE id = ?',
-        result.interval,
-        result.easeFactor,
-        result.repetitions,
-        toSqliteDatetime(result.nextReview),
-        currentCard.id
-      );
+      await supabase
+        .from('flashcards')
+        .update({
+          interval: result.interval,
+          ease_factor: result.easeFactor,
+          repetitions: result.repetitions,
+          next_review: result.nextReview.toISOString(),
+        })
+        .eq('id', currentCard.id);
 
       setQueue((prev) => prev.slice(1));
     },
-    [currentCard, db]
+    [currentCard]
   );
 
   return {

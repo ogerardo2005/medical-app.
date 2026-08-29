@@ -1,44 +1,51 @@
-import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useState } from 'react';
 
-import type { NoteRow } from '@/db/types';
+import { useAuth } from '@/features/auth/AuthContext';
+import { supabase } from '@/lib/supabase';
+import type { NoteRow } from '@/lib/types';
 
 export function useNotes() {
-  const db = useSQLiteContext();
+  const { session } = useAuth();
+  const userId = session?.user.id;
   const [notes, setNotes] = useState<NoteRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    const rows = await db.getAllAsync<NoteRow>('SELECT * FROM notes ORDER BY updated_at DESC');
-    setNotes(rows);
+    if (!userId) return;
+    const { data, error } = await supabase
+      .from('notes')
+      .select('*')
+      .order('updated_at', { ascending: false });
+    if (!error && data) setNotes(data);
     setIsLoading(false);
-  }, [db]);
+  }, [userId]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState happens after the `await`, not synchronously in the effect body
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial fetch on mount; setState happens after the `await`, not synchronously in the effect body
     refresh();
   }, [refresh]);
 
   const addNote = useCallback(
     async (title: string, content = '', templateType: string | null = null) => {
-      const result = await db.runAsync(
-        'INSERT INTO notes (title, content, template_type) VALUES (?, ?, ?)',
-        title,
-        content,
-        templateType
-      );
+      if (!userId) return null;
+      const { data, error } = await supabase
+        .from('notes')
+        .insert({ user_id: userId, title, content, template_type: templateType })
+        .select('id')
+        .single();
       await refresh();
-      return result.lastInsertRowId;
+      if (error || !data) throw error ?? new Error('Failed to create note');
+      return data.id;
     },
-    [db, refresh]
+    [userId, refresh]
   );
 
   const deleteNote = useCallback(
-    async (id: number) => {
-      await db.runAsync('DELETE FROM notes WHERE id = ?', id);
+    async (id: string) => {
+      await supabase.from('notes').delete().eq('id', id);
       await refresh();
     },
-    [db, refresh]
+    [refresh]
   );
 
   return { notes, isLoading, addNote, deleteNote, refresh };

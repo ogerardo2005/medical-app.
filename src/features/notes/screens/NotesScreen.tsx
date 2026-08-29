@@ -6,7 +6,7 @@ import { Alert, FlatList, Pressable, Text, TextInput, View } from 'react-native'
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Screen } from '@/components/ui/Screen';
-import type { NoteRow } from '@/db/types';
+import type { NoteRow } from '@/lib/types';
 import { palette, useThemeIconColors } from '@/theme/colors';
 
 import { useNotes } from '../hooks/useNotes';

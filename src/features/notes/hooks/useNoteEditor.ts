@@ -1,8 +1,9 @@
 import { useRouter } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { NoteRow } from '@/db/types';
+import { useAuth } from '@/features/auth/AuthContext';
+import { supabase } from '@/lib/supabase';
+import type { NoteRow } from '@/lib/types';
 
 import type { NoteTemplate } from '../constants/templates';
 
@@ -17,7 +18,8 @@ export type SaveStatus = 'idle' | 'saving' | 'saved';
  * other operation below can just always UPDATE by id.
  */
 export function useNoteEditor(idParam: string) {
-  const db = useSQLiteContext();
+  const { session } = useAuth();
+  const userId = session?.user.id;
   const router = useRouter();
 
   const [isReady, setIsReady] = useState(false);
@@ -26,7 +28,7 @@ export function useNoteEditor(idParam: string) {
   const [templateType, setTemplateType] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 
-  const noteIdRef = useRef<number | null>(null);
+  const noteIdRef = useRef<string | null>(null);
   const isNewDraftRef = useRef(false);
   const titleRef = useRef('');
   const contentRef = useRef('');
@@ -44,15 +46,17 @@ export function useNoteEditor(idParam: string) {
   const persist = useCallback(async () => {
     if (!noteIdRef.current || isDiscardedRef.current) return;
     setSaveStatus('saving');
-    await db.runAsync(
-      "UPDATE notes SET title = ?, content = ?, template_type = ?, updated_at = datetime('now') WHERE id = ?",
-      titleRef.current,
-      contentRef.current,
-      templateTypeRef.current,
-      noteIdRef.current
-    );
+    await supabase
+      .from('notes')
+      .update({
+        title: titleRef.current,
+        content: contentRef.current,
+        template_type: templateTypeRef.current,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', noteIdRef.current);
     setSaveStatus('saved');
-  }, [db]);
+  }, []);
 
   const scheduleAutosave = useCallback(() => {
     clearTimer();
@@ -60,24 +64,32 @@ export function useNoteEditor(idParam: string) {
   }, [clearTimer, persist]);
 
   useEffect(() => {
+    if (!userId) return;
     let cancelled = false;
 
     async function setup() {
       if (idParam === 'new') {
         if (noteIdRef.current) return;
-        const result = await db.runAsync("INSERT INTO notes (title, content) VALUES ('', '')");
-        if (cancelled) return;
-        noteIdRef.current = result.lastInsertRowId;
+        const { data, error } = await supabase
+          .from('notes')
+          .insert({ user_id: userId, title: '', content: '' })
+          .select('id')
+          .single();
+        if (cancelled || error || !data) return;
+        noteIdRef.current = data.id;
         isNewDraftRef.current = true;
         setIsReady(true);
-        router.setParams({ id: String(result.lastInsertRowId) });
+        router.setParams({ id: data.id });
         return;
       }
 
-      const numericId = Number(idParam);
-      if (noteIdRef.current === numericId) return;
+      if (noteIdRef.current === idParam) return;
 
-      const row = await db.getFirstAsync<NoteRow>('SELECT * FROM notes WHERE id = ?', numericId);
+      const { data: row } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('id', idParam)
+        .single<NoteRow>();
       if (cancelled || !row) return;
 
       noteIdRef.current = row.id;
@@ -94,7 +106,7 @@ export function useNoteEditor(idParam: string) {
     return () => {
       cancelled = true;
     };
-  }, [idParam, db, router]);
+  }, [idParam, userId, router]);
 
   const setTitle = useCallback(
     (value: string) => {
@@ -138,7 +150,7 @@ export function useNoteEditor(idParam: string) {
    * Persists pending edits before leaving the screen. The one exception: a note that
    * was freshly created via the '+' FAB (isNewDraftRef) and is still empty is deleted
    * instead of saved, so backing out of an unused draft doesn't litter the list. This
-   * never applies to a pre-existing note the user cleared out — that's their call, not
+   * never applies to a pre-existing note the user cleared out - that's their call, not
    * something we silently discard for them.
    */
   const saveOnExit = useCallback(async () => {
@@ -148,12 +160,12 @@ export function useNoteEditor(idParam: string) {
     const isEmpty = !titleRef.current.trim() && !contentRef.current.trim();
     if (isNewDraftRef.current && isEmpty) {
       isDiscardedRef.current = true;
-      await db.runAsync('DELETE FROM notes WHERE id = ?', noteIdRef.current);
+      await supabase.from('notes').delete().eq('id', noteIdRef.current);
       return;
     }
 
     await persist();
-  }, [clearTimer, db, persist]);
+  }, [clearTimer, persist]);
 
   return {
     isReady,

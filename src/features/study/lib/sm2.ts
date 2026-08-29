@@ -60,8 +60,3 @@ export function reviewCard(
 
   return { interval, easeFactor, repetitions, nextReview };
 }
-
-/** Formats a Date as the "YYYY-MM-DD HH:MM:SS" UTC string SQLite's datetime() produces. */
-export function toSqliteDatetime(date: Date): string {
-  return date.toISOString().slice(0, 19).replace('T', ' ');
-}
