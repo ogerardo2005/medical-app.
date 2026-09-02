@@ -7,6 +7,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { AuthProvider, useAuth } from '@/features/auth/AuthContext';
 import { AuthScreen } from '@/features/auth/screens/AuthScreen';
+import { ConfigMissingScreen } from '@/features/auth/screens/ConfigMissingScreen';
+import { isSupabaseConfigured } from '@/lib/supabase';
 import { GuardModeProvider, useGuardMode } from '@/theme/GuardModeContext';
 import { GuardModeOverlay } from '@/theme/GuardModeOverlay';
 
@@ -42,11 +44,15 @@ function AppShell() {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthProvider>
-        <GuardModeProvider>
-          <AppShell />
-        </GuardModeProvider>
-      </AuthProvider>
+      {isSupabaseConfigured ? (
+        <AuthProvider>
+          <GuardModeProvider>
+            <AppShell />
+          </GuardModeProvider>
+        </AuthProvider>
+      ) : (
+        <ConfigMissingScreen />
+      )}
     </GestureHandlerRootView>
   );
 }
