@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quiz: Leptospirosis y Difteria</title>
+<style>
+  :root {
+    --pink: #ff5da2;
+    --purple: #7c3aed;
+    --blue: #2563eb;
+    --teal: #06b6d4;
+    --green: #16a34a;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --card-bg: #ffffff;
+    --text-dark: #1f2340;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #7c3aed, #2563eb 35%, #06b6d4 70%, #16a34a);
+    background-size: 300% 300%;
+    animation: gradientShift 16s ease infinite;
+    color: var(--text-dark);
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px 60px;
+  }
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .app {
+    width: 100%;
+    max-width: 640px;
+  }
+  header.top {
+    text-align: center;
+    color: white;
+    margin-bottom: 18px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+  header.top h1 {
+    font-size: 1.6rem;
+    margin: 0 0 4px;
+  }
+  header.top p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+  }
+  .progress-wrap {
+    background: rgba(255,255,255,0.35);
+    border-radius: 999px;
+    height: 14px;
+    overflow: hidden;
+    margin: 16px 0;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--yellow), var(--pink));
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+  .card {
+    background: var(--card-bg);
+    border-radius: 22px;
+    padding: 26px 22px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+    animation: pop 0.35s ease;
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 999px;
+    color: white;
+    margin-bottom: 12px;
+  }
+  .badge.mc { background: var(--purple); }
+  .badge.tf { background: var(--blue); }
+  .badge.match { background: var(--teal); }
+  .badge.open { background: var(--pink); }
+  .qcount {
+    float: right;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #6b7280;
+  }
+  h2.question {
+    font-size: 1.2rem;
+    line-height: 1.4;
+    margin: 4px 0 18px;
+    clear: both;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt-btn {
+    text-align: left;
+    padding: 14px 16px;
+    border: 2px solid #e5e7eb;
+    background: #f9fafb;
+    border-radius: 14px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: var(--text-dark);
+  }
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--purple);
+    background: #f3e8ff;
+    transform: translateY(-1px);
+  }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct {
+    background: #dcfce7;
+    border-color: var(--green);
+    color: #14532d;
+    font-weight: 700;
+  }
+  .opt-btn.incorrect {
+    background: #fee2e2;
+    border-color: var(--red);
+    color: #7f1d1d;
+    font-weight: 700;
+  }
+  .tf-row { display: flex; gap: 12px; }
+  .tf-row .opt-btn { flex: 1; text-align: center; font-weight: 700; }
+  select.match-select {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 1rem;
+    border-radius: 14px;
+    border: 2px solid #e5e7eb;
+    background: #f9fafb;
+    color: var(--text-dark);
+  }
+  textarea.open-answer {
+    width: 100%;
+    min-height: 90px;
+    padding: 12px 14px;
+    font-size: 1rem;
+    border-radius: 14px;
+    border: 2px solid #e5e7eb;
+    background: #f9fafb;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .feedback {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback.show { display: block; animation: pop 0.3s ease; }
+  .feedback.good { background: #dcfce7; color: #14532d; }
+  .feedback.bad { background: #fee2e2; color: #7f1d1d; }
+  .feedback.info { background: #ede9fe; color: #3b0764; }
+  .btn-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    color: white;
+    box-shadow: 0 8px 18px rgba(124,58,237,0.4);
+    transition: transform 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn.secondary {
+    background: #f3f4f6;
+    color: var(--text-dark);
+    box-shadow: none;
+  }
+  .start-screen, .end-screen { text-align: center; }
+  .start-screen .emoji, .end-screen .emoji {
+    font-size: 3.2rem;
+    margin-bottom: 10px;
+  }
+  .start-screen h2 { font-size: 1.5rem; margin: 6px 0 8px; }
+  .start-screen p { color: #4b5563; margin: 0 0 20px; line-height: 1.5; }
+  .stats-row {
+    display: flex;
+    gap: 10px;
+    margin: 18px 0;
+    flex-wrap: wrap;
+  }
+  .stat-chip {
+    flex: 1;
+    min-width: 110px;
+    background: #f3f4f6;
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-chip .num { font-size: 1.4rem; font-weight: 800; }
+  .stat-chip .label { font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.03em; }
+  .score-big {
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin: 6px 0;
+  }
+  .review-list { text-align: left; margin-top: 8px; }
+  .review-item {
+    border-top: 1px solid #e5e7eb;
+    padding: 12px 0;
+    font-size: 0.92rem;
+  }
+  .review-item .rq { font-weight: 700; margin-bottom: 4px; }
+  .review-item .ra { color: #374151; }
+  .review-item.correct .ra.mine { color: var(--green); font-weight: 700; }
+  .review-item.incorrect .ra.mine { color: var(--red); font-weight: 700; }
+  .review-item .ra.model { color: var(--purple); }
+  .confetti-piece {
+    position: fixed;
+    top: -20px;
+    width: 10px;
+    height: 16px;
+    opacity: 0.9;
+    animation: fall linear forwards;
+    z-index: 5;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(360deg); opacity: 0.3; }
+  }
+  footer.note {
+    text-align: center;
+    color: rgba(255,255,255,0.85);
+    font-size: 0.8rem;
+    margin-top: 18px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>🦠 Quiz: Leptospirosis y Difteria</h1>
+    <p>Fisiopatología · ¡A ver cuánto recuerdas!</p>
+  </header>
+
+  <div id="progressWrap" class="progress-wrap" style="display:none;">
+    <div id="progressBar" class="progress-bar"></div>
+  </div>
+
+  <div id="cardHost" class="card"></div>
+
+  <footer class="note">Hecho para repasar leptospirosis y difteria 💪</footer>
+</div>
+
+<script>
+const questions = [
+  // Parte I - Opción múltiple
+  { type:'mc', text:'1. La leptospirosis es causada por una bacteria con forma de:', options:['Coco','Bacilo','Espiroqueta','Vibrión'], correct:2,
+    explain:'Leptospira es una bacteria con forma de espiroqueta (helicoidal), igual que el agente de la sífilis.' },
+  { type:'mc', text:'2. ¿Cuál es la especie de Leptospira que causa la mayoría de los casos?', options:['L. biflexa','L. interrogans','L. noguchii','L. weilii'], correct:1,
+    explain:'La especie interrogans es la principal causante de leptospirosis.' },
+  { type:'mc', text:'3. El principal reservorio de Leptospira son:', options:['Perros','Ratas','Aves','Murciélagos'], correct:1,
+    explain:'Las ratas son el reservorio principal: portan la bacteria en los túbulos renales y la excretan por la orina.' },
+  { type:'mc', text:'4. ¿Cuál es el periodo de incubación de la leptospirosis?', options:['1-3 días','5-14 días','20-30 días','2-3 meses'], correct:1,
+    explain:'El periodo de incubación es de 5 a 14 días.' },
+  { type:'mc', text:'5. La forma grave de leptospirosis se conoce como:', options:['Síndrome de Weil','Síndrome de Guillain-Barré','Enfermedad de Weil','Fiebre de las Montañas Rocosas'], correct:2,
+    explain:'La forma grave de leptospirosis se llama enfermedad de Weil, con la tríada fiebre, ictericia y afectación renal.' },
+  { type:'mc', text:'6. La tríada clásica de la enfermedad de Weil incluye fiebre, ictericia y:', options:['Neumonía','Afectación renal','Meningitis','Artritis'], correct:1,
+    explain:'La tríada de la enfermedad de Weil es fiebre + ictericia + afectación renal.' },
+  { type:'mc', text:'7. El método diagnóstico de confirmación (primera línea) para leptospirosis es:', options:['Hemocultivo','ELISA','PCR en sangre u orina','Biopsia hepática'], correct:2,
+    explain:'El diagnóstico de confirmación es por PCR en sangre u orina.' },
+  { type:'mc', text:'8. Si el PCR no está disponible, ¿qué prueba serológica de segunda línea se utiliza?', options:['MAT (microaglutinación)','Western blot','VDRL','PPD'], correct:0,
+    explain:'Cuando el PCR no está disponible se recurre a la serología MAT (microaglutinación).' },
+  { type:'mc', text:'9. El tratamiento de primera línea para leptospirosis leve es:', options:['Ceftriaxona','Doxiciclina','Penicilina cristalina','Vancomicina'], correct:1,
+    explain:'En leptospirosis leve, la doxiciclina es el tratamiento de primera línea.' },
+  { type:'mc', text:'10. En embarazadas con leptospirosis leve, se prefiere como segunda línea:', options:['Doxiciclina','Azitromicina o amoxicilina','Ceftriaxona','Gentamicina'], correct:1,
+    explain:'En embarazadas no se usa doxiciclina (contraindicada), por lo que la segunda línea es azitromicina o amoxicilina.' },
+  { type:'mc', text:'11. La difteria es causada por:', options:['Corynebacterium diphtheriae','Streptococcus pyogenes','Bordetella pertussis','Haemophilus influenzae'], correct:0,
+    explain:'Corynebacterium diphtheriae es la bacteria causante de la difteria.' },
+  { type:'mc', text:'12. En la tinción de Gram, Corynebacterium diphtheriae se observa como:', options:['Cocos gramnegativos en cadena','Bacilos grampositivos con caracteres chinos','Espiroquetas','Bacilos ácido-alcohol resistentes'], correct:1,
+    explain:'Se observa como bacilo grampositivo con disposición en "caracteres chinos".' },
+  { type:'mc', text:'13. El signo clínico característico "cuello de toro" se refiere a:', options:['Edema periorbitario','Linfadenopatía cervical importante','Rigidez de nuca','Ictericia facial'], correct:1,
+    explain:'El "cuello de toro" corresponde a linfadenopatía cervical importante.' },
+  { type:'mc', text:'14. El hallazgo faríngeo clásico de la difteria es:', options:['Exudado purulento','Pseudomembranas','Petequias en paladar','Úlceras aftosas'], correct:1,
+    explain:'El hallazgo faríngeo clásico son las pseudomembranas.' },
+  { type:'mc', text:'15. El estándar de oro para el diagnóstico de difteria es:', options:['PCR','Cultivo en agar telurita o Loeffler','Serología','Biopsia'], correct:1,
+    explain:'El estándar de oro diagnóstico es el cultivo en agar telurita o agar Loeffler.' },
+  { type:'mc', text:'16. La toxina diftérica actúa mediante:', options:['Inhibición del factor de elongación 2 (FE2), deteniendo la síntesis proteica','Destrucción directa de eritrocitos','Bloqueo de canales de sodio','Inhibición de la acetilcolinesterasa'], correct:0,
+    explain:'La toxina diftérica inhibe el factor de elongación 2 (FE2), deteniendo la síntesis proteica y causando necrosis celular.' },
+  { type:'mc', text:'17. ¿Cuál es la base del tratamiento de la difteria?', options:['Penicilina G benzatínica','Antitoxina equina','Ceftriaxona','Vacunación de rescate'], correct:1,
+    explain:'La antitoxina equina neutraliza la toxina circulante antes de que dañe más tejido.' },
+  { type:'mc', text:'18. La prevención de la difteria se realiza principalmente con la vacuna:', options:['BCG','DTP (a los 4 años)','Neumocócica','Influenza'], correct:1,
+    explain:'La vacuna DTP, aplicada a los 4 años, es la principal medida preventiva contra la difteria.' },
+  { type:'mc', text:'19. Una complicación cardiaca de la difteria es:', options:['Pericarditis constrictiva','Miocarditis con arritmias','Endocarditis infecciosa','Taponamiento cardiaco'], correct:1,
+    explain:'La miocarditis con arritmias es una complicación cardiaca directa de la toxina diftérica.' },
+  { type:'mc', text:'20. La difteria cutánea se caracteriza por:', options:['Ser muy frecuente y afectar cara','Úlceras en "sacabocados" en miembros inferiores, muy contagiosa','Vesículas dolorosas en tronco','Pápulas eritematosas pruriginosas'], correct:1,
+    explain:'La difteria cutánea es rara, se presenta como úlceras en "sacabocados" en miembros inferiores y es muy contagiosa.' },
+
+  // Parte II - Verdadero o Falso
+  { type:'tf', text:'21. La leptospirosis puede sobrevivir meses en agua limpia o suelo contaminado con orina.', correct:true,
+    explain:'Verdadero. La bacteria puede vivir meses, incluso en las tapas de latas, y sobrevive en agua limpia o suelo contaminado con orina.' },
+  { type:'tf', text:'22. La mayoría de los casos de leptospirosis son sintomáticos y graves desde el inicio.', correct:false,
+    explain:'Falso. Generalmente es asintomática; solo una minoría desarrolla formas sintomáticas leves o graves.' },
+  { type:'tf', text:'23. El hemocultivo y urocultivo para leptospirosis tienen alta sensibilidad.', correct:false,
+    explain:'Falso. Son raros de usar y tienen baja sensibilidad, por lo que no son la prueba de elección.' },
+  { type:'tf', text:'24. La difteria ataca principalmente a niños no vacunados.', correct:true,
+    explain:'Verdadero. Ataca más a niños, especialmente cuando no tienen el esquema de vacunación completo (DTP).' },
+  { type:'tf', text:'25. El tratamiento de la difteria debe iniciarse antes de confirmar el diagnóstico por el riesgo de progresión rápida.', correct:true,
+    explain:'Verdadero. Por ser una infección grave y de progresión rápida, el tratamiento (ABCD + antitoxina) se inicia antes de confirmar el diagnóstico.' },
+
+  // Parte III - Relación de columnas
+  { type:'match', text:'26. Leptospirosis leve', options:['Ceftriaxona/cefotaxima o penicilina cristalina','Doxiciclina','Penicilina G procaínica o eritromicina','ABCD (asegurar vía aérea)','Relación albúmina-creatinina'], correct:1,
+    explain:'Leptospirosis leve se trata con doxiciclina (1ra línea).' },
+  { type:'match', text:'27. Leptospirosis grave', options:['Ceftriaxona/cefotaxima o penicilina cristalina','Doxiciclina','Penicilina G procaínica o eritromicina','ABCD (asegurar vía aérea)','Relación albúmina-creatinina'], correct:0,
+    explain:'Leptospirosis grave se trata con ceftriaxona/cefotaxima o penicilina cristalina.' },
+  { type:'match', text:'28. Difteria - tratamiento inicial', options:['Ceftriaxona/cefotaxima o penicilina cristalina','Doxiciclina','Penicilina G procaínica o eritromicina','ABCD (asegurar vía aérea)','Relación albúmina-creatinina'], correct:3,
+    explain:'El tratamiento inicial de la difteria es asegurar la vía aérea (ABCD), antes que cualquier antibiótico.' },
+  { type:'match', text:'29. Difteria - prevención', options:['Ceftriaxona/cefotaxima o penicilina cristalina','Doxiciclina','Penicilina G procaínica o eritromicina','ABCD (asegurar vía aérea)','Relación albúmina-creatinina'], correct:2,
+    explain:'La prevención/profilaxis en contactos se hace con penicilina G procaínica o eritromicina, además de la vacunación.' },
+  { type:'match', text:'30. Marcador de daño renal en leptospirosis', options:['Ceftriaxona/cefotaxima o penicilina cristalina','Doxiciclina','Penicilina G procaínica o eritromicina','ABCD (asegurar vía aérea)','Relación albúmina-creatinina'], correct:4,
+    explain:'El marcador de daño renal en leptospirosis es la relación albúmina-creatinina.' },
+
+  // Parte IV - Preguntas abiertas cortas
+  { type:'open', text:'31. Menciona dos factores de exposición ocupacional o ambiental que aumentan el riesgo de leptospirosis.',
+    model:'Exposición ocupacional (agricultura, ganadería) y vivir en áreas urbanas infestadas de roedores o propensas a inundaciones: ambas ponen a la persona en contacto con orina de animales infectados.' },
+  { type:'open', text:'32. Describe los síntomas de la leptospirosis leve.',
+    model:'Sin ictericia ni afectación renal; dolor de pantorrillas y sufusión conjuntival (a diferencia de la forma grave, que sí cursa con la tríada completa).' },
+  { type:'open', text:'33. Explica por qué en la difteria se debe iniciar tratamiento antes de tener la confirmación diagnóstica.',
+    model:'Porque es una infección grave y de progresión rápida: si se espera la confirmación por cultivo (que tarda) se corre el riesgo de complicaciones como obstrucción de la vía aérea por el "cuello de toro" o miocarditis, por lo que el manejo (ABCD + antitoxina) se inicia de forma empírica ante la sospecha clínica.' },
+  { type:'open', text:'34. ¿Qué escala se usa para evaluar el déficit neurológico (parte D del ABCD) en el manejo de la vía aérea?',
+    model:'La escala de Glasgow, usada para evaluar el déficit neurológico correspondiente a la letra D del abordaje ABCD.' },
+  { type:'open', text:'35. Menciona dos complicaciones neurológicas o musculares de la difteria.',
+    model:'Miocarditis con arritmias y neuropatía con disfagia y parálisis facial/muscular; ambas son consecuencia de la toxina diftérica, que también puede afectar el riñón.' },
+];
+
+let current = -1; // -1 = start screen
+let score = 0;
+let gradedCount = 0;
+const answers = new Array(questions.length).fill(null);
+const openRevealed = new Array(questions.length).fill(false);
+
+const cardHost = document.getElementById('cardHost');
+const progressWrap = document.getElementById('progressWrap');
+const progressBar = document.getElementById('progressBar');
+
+function renderStart() {
+  progressWrap.style.display = 'none';
+  cardHost.innerHTML = `
+    <div class="start-screen">
+      <div class="emoji">🧪🦠</div>
+      <h2>¿Listo para el reto?</h2>
+      <p>35 preguntas sobre <strong>Leptospirosis</strong> y <strong>Difteria</strong>: opción múltiple, verdadero/falso, relación de columnas y preguntas abiertas cortas. ¡Vamos con todo!</p>
+      <button class="btn" onclick="startQuiz()">Comenzar 🚀</button>
+    </div>
+  `;
+}
+
+function startQuiz() {
+  current = 0;
+  score = 0;
+  gradedCount = 0;
+  answers.fill(null);
+  openRevealed.fill(false);
+  progressWrap.style.display = 'block';
+  renderQuestion();
+}
+
+function updateProgress() {
+  const pct = Math.round((current / questions.length) * 100);
+  progressBar.style.width = pct + '%';
+}
+
+function badgeInfo(type) {
+  switch (type) {
+    case 'mc': return ['mc', 'Opción múltiple'];
+    case 'tf': return ['tf', 'Verdadero o falso'];
+    case 'match': return ['match', 'Relación de columnas'];
+    case 'open': return ['open', 'Pregunta abierta'];
+  }
+}
+
+function renderQuestion() {
+  updateProgress();
+  const q = questions[current];
+  const [badgeClass, badgeLabel] = badgeInfo(q.type);
+  let bodyHtml = '';
+
+  if (q.type === 'mc') {
+    bodyHtml = `<div class="options">` + q.options.map((opt, i) =>
+      `<button class="opt-btn" data-idx="${i}" onclick="selectMC(${i})">${String.fromCharCode(97+i)}) ${opt}</button>`
+    ).join('') + `</div>`;
+  } else if (q.type === 'tf') {
+    bodyHtml = `<div class="tf-row">
+      <button class="opt-btn" data-val="true" onclick="selectTF(true)">✅ Verdadero</button>
+      <button class="opt-btn" data-val="false" onclick="selectTF(false)">❌ Falso</button>
+    </div>`;
+  } else if (q.type === 'match') {
+    const opts = q.options.map((opt, i) => `<option value="${i}">${String.fromCharCode(97+i)}) ${opt}</option>`).join('');
+    bodyHtml = `
+      <select class="match-select" id="matchSelect">
+        <option value="" disabled selected>Elige la opción correcta...</option>
+        ${opts}
+      </select>
+      <div class="btn-row">
+        <button class="btn" id="confirmMatchBtn" onclick="confirmMatch()">Confirmar</button>
+      </div>
+    `;
+  } else if (q.type === 'open') {
+    bodyHtml = `
+      <textarea class="open-answer" id="openInput" placeholder="Escribe tu respuesta aquí..."></textarea>
+      <div class="btn-row">
+        <button class="btn" id="revealBtn" onclick="revealOpen()">Ver respuesta modelo</button>
+      </div>
+    `;
+  }
+
+  cardHost.innerHTML = `
+    <span class="qcount">${current + 1} / ${questions.length}</span>
+    <span class="badge ${badgeClass}">${badgeLabel}</span>
+    <h2 class="question">${q.text}</h2>
+    ${bodyHtml}
+    <div class="feedback" id="feedback"></div>
+    <div class="btn-row">
+      <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Siguiente ➜</button>
+    </div>
+  `;
+}
+
+function lockOptions() {
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+}
+
+function showFeedback(kind, text) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback show ' + kind;
+  fb.innerHTML = text;
+}
+
+function enableNext() {
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function selectMC(idx) {
+  if (answers[current] !== null) return;
+  const q = questions[current];
+  answers[current] = idx;
+  lockOptions();
+  const btns = document.querySelectorAll('.opt-btn');
+  btns[q.correct].classList.add('correct');
+  if (idx !== q.correct) {
+    btns[idx].classList.add('incorrect');
+    showFeedback('bad', '❌ ¡Casi! ' + q.explain);
+  } else {
+    score++;
+    showFeedback('good', '✅ ¡Correcto! ' + q.explain);
+    launchConfettiBurst();
+  }
+  gradedCount++;
+  enableNext();
+}
+
+function selectTF(val) {
+  if (answers[current] !== null) return;
+  const q = questions[current];
+  answers[current] = val;
+  lockOptions();
+  const btns = document.querySelectorAll('.opt-btn');
+  const correctBtn = [...btns].find(b => b.dataset.val === String(q.correct));
+  correctBtn.classList.add('correct');
+  if (val !== q.correct) {
+    const wrongBtn = [...btns].find(b => b.dataset.val === String(val));
+    wrongBtn.classList.add('incorrect');
+    showFeedback('bad', '❌ Era ' + (q.correct ? 'Verdadero' : 'Falso') + '. ' + q.explain);
+  } else {
+    score++;
+    showFeedback('good', '✅ ¡Correcto! ' + q.explain);
+    launchConfettiBurst();
+  }
+  gradedCount++;
+  enableNext();
+}
+
+function confirmMatch() {
+  const sel = document.getElementById('matchSelect');
+  if (!sel.value) return;
+  const q = questions[current];
+  const idx = parseInt(sel.value, 10);
+  answers[current] = idx;
+  sel.disabled = true;
+  document.getElementById('confirmMatchBtn').disabled = true;
+  if (idx === q.correct) {
+    score++;
+    showFeedback('good', '✅ ¡Correcto! ' + q.explain);
+    launchConfettiBurst();
+  } else {
+    showFeedback('bad', '❌ La respuesta correcta era "' + String.fromCharCode(97+q.correct) + ') ' + q.options[q.correct] + '". ' + q.explain);
+  }
+  gradedCount++;
+  enableNext();
+}
+
+function revealOpen() {
+  const q = questions[current];
+  const val = document.getElementById('openInput').value.trim();
+  answers[current] = val;
+  openRevealed[current] = true;
+  document.getElementById('openInput').disabled = true;
+  document.getElementById('revealBtn').disabled = true;
+  showFeedback('info', '💡 <strong>Respuesta modelo:</strong> ' + q.model);
+  enableNext();
+}
+
+function nextQuestion() {
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    current = questions.length;
+    renderEnd();
+  }
+}
+
+function renderEnd() {
+  progressBar.style.width = '100%';
+  const pct = Math.round((score / gradedCount) * 100);
+  let emoji = '🎉';
+  let msg = '¡Excelente dominio del tema!';
+  if (pct < 50) { emoji = '📚'; msg = '¡Vale la pena repasar un poco más!'; }
+  else if (pct < 75) { emoji = '💪'; msg = '¡Buen trabajo, ya casi lo dominas!'; }
+  else if (pct < 90) { emoji = '🌟'; msg = '¡Muy bien! Tienes bases sólidas.'; }
+
+  const reviewHtml = questions.map((q, i) => {
+    if (q.type === 'open') {
+      return `<div class="review-item">
+        <div class="rq">${q.text}</div>
+        <div class="ra mine">Tu respuesta: ${answers[i] ? answers[i] : '(sin respuesta)'}</div>
+        <div class="ra model">Modelo: ${q.model}</div>
+      </div>`;
+    }
+    let correctText, myText, isCorrect;
+    if (q.type === 'mc') {
+      correctText = String.fromCharCode(97+q.correct) + ') ' + q.options[q.correct];
+      myText = answers[i] !== null ? String.fromCharCode(97+answers[i]) + ') ' + q.options[answers[i]] : '(sin responder)';
+      isCorrect = answers[i] === q.correct;
+    } else if (q.type === 'tf') {
+      correctText = q.correct ? 'Verdadero' : 'Falso';
+      myText = answers[i] === null ? '(sin responder)' : (answers[i] ? 'Verdadero' : 'Falso');
+      isCorrect = answers[i] === q.correct;
+    } else if (q.type === 'match') {
+      correctText = String.fromCharCode(97+q.correct) + ') ' + q.options[q.correct];
+      myText = answers[i] !== null ? String.fromCharCode(97+answers[i]) + ') ' + q.options[answers[i]] : '(sin responder)';
+      isCorrect = answers[i] === q.correct;
+    }
+    return `<div class="review-item ${isCorrect ? 'correct' : 'incorrect'}">
+      <div class="rq">${q.text}</div>
+      <div class="ra mine">Tu respuesta: ${myText} ${isCorrect ? '✅' : '❌'}</div>
+      ${isCorrect ? '' : `<div class="ra">Correcta: ${correctText}</div>`}
+    </div>`;
+  }).join('');
+
+  cardHost.innerHTML = `
+    <div class="end-screen">
+      <div class="emoji">${emoji}</div>
+      <h2>${msg}</h2>
+      <div class="score-big">${score} / ${gradedCount}</div>
+      <div class="stats-row">
+        <div class="stat-chip"><div class="num">${pct}%</div><div class="label">Aciertos</div></div>
+        <div class="stat-chip"><div class="num">${questions.length}</div><div class="label">Preguntas</div></div>
+      </div>
+      <button class="btn" onclick="startQuiz()">Intentar de nuevo 🔁</button>
+    </div>
+    <div class="review-list">
+      <h2 class="question" style="margin-top:24px;">📋 Revisión completa</h2>
+      ${reviewHtml}
+    </div>
+  `;
+  launchConfettiBurst(30);
+}
+
+function launchConfettiBurst(count) {
+  const colors = ['#ff5da2', '#7c3aed', '#2563eb', '#06b6d4', '#16a34a', '#f59e0b'];
+  const n = count || 14;
+  for (let i = 0; i < n; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = (2 + Math.random() * 1.5) + 's';
+    piece.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 3600);
+  }
+}
+
+renderStart();
+</script>
+</body>
+</html>
