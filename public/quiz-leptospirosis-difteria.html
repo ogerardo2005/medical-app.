@@ -3,37 +3,68 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Quiz: Leptospirosis y Difteria</title>
+<title>Quiz Leptospirosis y Difteria</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
   :root {
-    --pink: #ff5da2;
-    --purple: #7c3aed;
-    --blue: #2563eb;
-    --teal: #06b6d4;
-    --green: #16a34a;
-    --red: #ef4444;
-    --yellow: #f59e0b;
-    --card-bg: #ffffff;
-    --text-dark: #1f2340;
+    /* Gram-stain palette: crystal violet + safranin counterstain + iodine mordant */
+    --violet: #6c3fb5;
+    --violet-deep: #4c2a86;
+    --violet-soft: #efe7fb;
+    --violet-ink: #3c1f6b;
+    --safranin: #e0457e;
+    --iodine: #d99a2b;
+    --teal: #1c8f92;
+    --growth: #1f9d63;
+    --growth-soft: #e0f6ea;
+    --growth-ink: #0f6b41;
+    --contam: #d6433f;
+    --contam-soft: #fbe4e3;
+    --contam-ink: #7a1f1c;
+    --card-bg: #fffdf8;
+    --text-dark: #1d2233;
+    --text-soft: #5b566c;
+    --line: #e4e1ee;
+    --well: #faf8fc;
+    --slide: #eef1f6;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     min-height: 100vh;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: linear-gradient(135deg, #7c3aed, #2563eb 35%, #06b6d4 70%, #16a34a);
-    background-size: 300% 300%;
-    animation: gradientShift 16s ease infinite;
+    font-family: 'Nunito Sans', system-ui, -apple-system, sans-serif;
+    background:
+      radial-gradient(circle at 18% 12%, rgba(255,255,255,0.16) 0, transparent 40%),
+      radial-gradient(circle at 82% 85%, rgba(255,255,255,0.14) 0, transparent 38%),
+      linear-gradient(135deg, var(--violet-deep), var(--violet) 32%, var(--safranin) 68%, var(--iodine) 100%);
+    background-size: 100% 100%, 100% 100%, 300% 300%;
+    animation: gradientShift 18s ease infinite;
     color: var(--text-dark);
     display: flex;
     justify-content: center;
     padding: 24px 16px 60px;
   }
   @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% { background-position: 0 0, 0 0, 0% 50%; }
+    50% { background-position: 0 0, 0 0, 100% 50%; }
+    100% { background-position: 0 0, 0 0, 0% 50%; }
   }
+  .petri {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    position: relative;
+    background: radial-gradient(circle at 35% 28%, #fffdf8, var(--slide) 72%);
+    border: 4px solid var(--violet-deep);
+    box-shadow: inset 0 3px 8px rgba(30,15,60,0.18), 0 6px 14px rgba(30,15,60,0.22);
+  }
+  .petri .colony {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(0.2px);
+  }
+  .start-screen .petri, .end-screen .petri { width: 96px; height: 96px; }
   .app {
     width: 100%;
     max-width: 640px;
@@ -45,13 +76,19 @@
     text-shadow: 0 2px 10px rgba(0,0,0,0.25);
   }
   header.top h1 {
-    font-size: 1.6rem;
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    text-wrap: balance;
     margin: 0 0 4px;
   }
   header.top p {
     margin: 0;
-    opacity: 0.9;
-    font-size: 0.95rem;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
   }
   .progress-wrap {
     background: rgba(255,255,255,0.35);
@@ -64,15 +101,15 @@
   .progress-bar {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, var(--yellow), var(--pink));
+    background: linear-gradient(90deg, var(--iodine), var(--safranin));
     border-radius: 999px;
     transition: width 0.35s ease;
   }
   .card {
     background: var(--card-bg);
-    border-radius: 22px;
+    border-radius: 20px;
     padding: 26px 22px;
-    box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+    box-shadow: 0 18px 40px rgba(30,15,60,0.28);
     animation: pop 0.35s ease;
   }
   @keyframes pop {
@@ -81,28 +118,33 @@
   }
   .badge {
     display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    padding: 4px 12px;
+    padding: 4px 11px;
     border-radius: 999px;
     color: white;
     margin-bottom: 12px;
   }
-  .badge.mc { background: var(--purple); }
-  .badge.tf { background: var(--blue); }
+  .badge.mc { background: var(--violet); }
+  .badge.tf { background: var(--iodine); }
   .badge.match { background: var(--teal); }
-  .badge.open { background: var(--pink); }
+  .badge.open { background: var(--safranin); }
   .qcount {
     float: right;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #6b7280;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-soft);
   }
   h2.question {
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    font-weight: 700;
     font-size: 1.2rem;
     line-height: 1.4;
+    text-wrap: balance;
     margin: 4px 0 18px;
     clear: both;
   }
@@ -110,30 +152,32 @@
   .opt-btn {
     text-align: left;
     padding: 14px 16px;
-    border: 2px solid #e5e7eb;
-    background: #f9fafb;
+    border: 2px solid var(--line);
+    background: var(--well);
     border-radius: 14px;
+    font-family: inherit;
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.15s ease;
     color: var(--text-dark);
   }
   .opt-btn:hover:not(:disabled) {
-    border-color: var(--purple);
-    background: #f3e8ff;
+    border-color: var(--violet);
+    background: var(--violet-soft);
     transform: translateY(-1px);
   }
+  .opt-btn:focus-visible { outline: 3px solid var(--iodine); outline-offset: 2px; }
   .opt-btn:disabled { cursor: default; }
   .opt-btn.correct {
-    background: #dcfce7;
-    border-color: var(--green);
-    color: #14532d;
+    background: var(--growth-soft);
+    border-color: var(--growth);
+    color: var(--growth-ink);
     font-weight: 700;
   }
   .opt-btn.incorrect {
-    background: #fee2e2;
-    border-color: var(--red);
-    color: #7f1d1d;
+    background: var(--contam-soft);
+    border-color: var(--contam);
+    color: var(--contam-ink);
     font-weight: 700;
   }
   .tf-row { display: flex; gap: 12px; }
@@ -142,9 +186,10 @@
     width: 100%;
     padding: 12px 14px;
     font-size: 1rem;
+    font-family: inherit;
     border-radius: 14px;
-    border: 2px solid #e5e7eb;
-    background: #f9fafb;
+    border: 2px solid var(--line);
+    background: var(--well);
     color: var(--text-dark);
   }
   textarea.open-answer {
@@ -153,8 +198,8 @@
     padding: 12px 14px;
     font-size: 1rem;
     border-radius: 14px;
-    border: 2px solid #e5e7eb;
-    background: #f9fafb;
+    border: 2px solid var(--line);
+    background: var(--well);
     font-family: inherit;
     resize: vertical;
   }
@@ -167,9 +212,9 @@
     display: none;
   }
   .feedback.show { display: block; animation: pop 0.3s ease; }
-  .feedback.good { background: #dcfce7; color: #14532d; }
-  .feedback.bad { background: #fee2e2; color: #7f1d1d; }
-  .feedback.info { background: #ede9fe; color: #3b0764; }
+  .feedback.good { background: var(--growth-soft); color: var(--growth-ink); }
+  .feedback.bad { background: var(--contam-soft); color: var(--contam-ink); }
+  .feedback.info { background: var(--violet-soft); color: var(--violet-ink); }
   .btn-row {
     display: flex;
     justify-content: flex-end;
@@ -179,32 +224,36 @@
     padding: 12px 24px;
     border: none;
     border-radius: 999px;
+    font-family: 'Baloo 2', system-ui, sans-serif;
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    background: linear-gradient(135deg, var(--purple), var(--pink));
+    background: linear-gradient(135deg, var(--violet), var(--safranin));
     color: white;
-    box-shadow: 0 8px 18px rgba(124,58,237,0.4);
+    box-shadow: 0 8px 18px rgba(108,63,181,0.4);
     transition: transform 0.15s ease;
   }
   .btn:hover { transform: translateY(-2px); }
+  .btn:focus-visible { outline: 3px solid var(--iodine); outline-offset: 2px; }
   .btn:disabled {
     opacity: 0.45;
     cursor: not-allowed;
     transform: none;
   }
   .btn.secondary {
-    background: #f3f4f6;
+    background: var(--well);
     color: var(--text-dark);
     box-shadow: none;
   }
   .start-screen, .end-screen { text-align: center; }
-  .start-screen .emoji, .end-screen .emoji {
-    font-size: 3.2rem;
-    margin-bottom: 10px;
+  .start-screen h2 {
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-wrap: balance;
+    margin: 6px 0 8px;
   }
-  .start-screen h2 { font-size: 1.5rem; margin: 6px 0 8px; }
-  .start-screen p { color: #4b5563; margin: 0 0 20px; line-height: 1.5; }
+  .start-screen p { color: var(--text-soft); margin: 0 0 20px; line-height: 1.5; }
   .stats-row {
     display: flex;
     gap: 10px;
@@ -214,17 +263,19 @@
   .stat-chip {
     flex: 1;
     min-width: 110px;
-    background: #f3f4f6;
+    background: var(--well);
     border-radius: 14px;
     padding: 12px;
     text-align: center;
   }
-  .stat-chip .num { font-size: 1.4rem; font-weight: 800; }
-  .stat-chip .label { font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.03em; }
+  .stat-chip .num { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 1.4rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat-chip .label { font-size: 0.75rem; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.03em; }
   .score-big {
+    font-family: 'Baloo 2', system-ui, sans-serif;
     font-size: 3rem;
-    font-weight: 900;
-    background: linear-gradient(135deg, var(--purple), var(--pink));
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(135deg, var(--violet), var(--safranin));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -232,15 +283,15 @@
   }
   .review-list { text-align: left; margin-top: 8px; }
   .review-item {
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--line);
     padding: 12px 0;
     font-size: 0.92rem;
   }
   .review-item .rq { font-weight: 700; margin-bottom: 4px; }
-  .review-item .ra { color: #374151; }
-  .review-item.correct .ra.mine { color: var(--green); font-weight: 700; }
-  .review-item.incorrect .ra.mine { color: var(--red); font-weight: 700; }
-  .review-item .ra.model { color: var(--purple); }
+  .review-item .ra { color: var(--text-soft); }
+  .review-item.correct .ra.mine { color: var(--growth-ink); font-weight: 700; }
+  .review-item.incorrect .ra.mine { color: var(--contam-ink); font-weight: 700; }
+  .review-item .ra.model { color: var(--violet); }
   .confetti-piece {
     position: fixed;
     top: -20px;
@@ -259,13 +310,22 @@
     font-size: 0.8rem;
     margin-top: 18px;
   }
+  @media (prefers-reduced-motion: reduce) {
+    body { animation: none; }
+    .opt-btn, .btn { transition: none; }
+  }
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top">
-    <h1>🦠 Quiz: Leptospirosis y Difteria</h1>
-    <p>Fisiopatología · ¡A ver cuánto recuerdas!</p>
+    <div class="petri" aria-hidden="true">
+      <span class="colony" style="width:14px;height:14px;left:12px;top:14px;background:var(--violet);opacity:.85;"></span>
+      <span class="colony" style="width:9px;height:9px;left:34px;top:30px;background:var(--safranin);opacity:.85;"></span>
+      <span class="colony" style="width:11px;height:11px;left:20px;top:38px;background:var(--iodine);opacity:.8;"></span>
+    </div>
+    <h1>Quiz Leptospirosis y Difteria</h1>
+    <p>FICHA DE REPASO &middot; FISIOPATOLOG&Iacute;A</p>
   </header>
 
   <div id="progressWrap" class="progress-wrap" style="display:none;">
@@ -274,7 +334,7 @@
 
   <div id="cardHost" class="card"></div>
 
-  <footer class="note">Hecho para repasar leptospirosis y difteria 💪</footer>
+  <footer class="note">Hecho para repasar leptospirosis y difteria</footer>
 </div>
 
 <script>
@@ -368,14 +428,26 @@ const cardHost = document.getElementById('cardHost');
 const progressWrap = document.getElementById('progressWrap');
 const progressBar = document.getElementById('progressBar');
 
+const COLONY_SPOTS = [
+  [20,18],[52,12],[76,26],[14,46],[44,40],[70,50],[24,70],[54,64],[80,74],[40,84]
+];
+const COLONY_COLORS = ['var(--violet)','var(--safranin)','var(--iodine)','var(--teal)','var(--growth)'];
+function petriHTML(n) {
+  const spans = COLONY_SPOTS.slice(0, n).map(([x, y], i) => {
+    const size = 8 + (i % 3) * 3;
+    return `<span class="colony" style="width:${size}px;height:${size}px;left:${x}px;top:${y}px;background:${COLONY_COLORS[i % COLONY_COLORS.length]};opacity:.85;"></span>`;
+  }).join('');
+  return `<div class="petri" aria-hidden="true">${spans}</div>`;
+}
+
 function renderStart() {
   progressWrap.style.display = 'none';
   cardHost.innerHTML = `
     <div class="start-screen">
-      <div class="emoji">🧪🦠</div>
+      ${petriHTML(3)}
       <h2>¿Listo para el reto?</h2>
-      <p>35 preguntas sobre <strong>Leptospirosis</strong> y <strong>Difteria</strong>: opción múltiple, verdadero/falso, relación de columnas y preguntas abiertas cortas. ¡Vamos con todo!</p>
-      <button class="btn" onclick="startQuiz()">Comenzar 🚀</button>
+      <p>35 preguntas sobre <strong>Leptospirosis</strong> y <strong>Difteria</strong>: opción múltiple, verdadero/falso, relación de columnas y preguntas abiertas cortas. Cada acierto sigue haciendo crecer el cultivo. ¡Vamos con todo!</p>
+      <button class="btn" onclick="startQuiz()">Comenzar</button>
     </div>
   `;
 }
@@ -548,11 +620,10 @@ function nextQuestion() {
 function renderEnd() {
   progressBar.style.width = '100%';
   const pct = Math.round((score / gradedCount) * 100);
-  let emoji = '🎉';
   let msg = '¡Excelente dominio del tema!';
-  if (pct < 50) { emoji = '📚'; msg = '¡Vale la pena repasar un poco más!'; }
-  else if (pct < 75) { emoji = '💪'; msg = '¡Buen trabajo, ya casi lo dominas!'; }
-  else if (pct < 90) { emoji = '🌟'; msg = '¡Muy bien! Tienes bases sólidas.'; }
+  if (pct < 50) { msg = 'Vale la pena repasar un poco más.'; }
+  else if (pct < 75) { msg = '¡Buen trabajo, ya casi lo dominas!'; }
+  else if (pct < 90) { msg = '¡Muy bien! Tienes bases sólidas.'; }
 
   const reviewHtml = questions.map((q, i) => {
     if (q.type === 'open') {
@@ -585,17 +656,17 @@ function renderEnd() {
 
   cardHost.innerHTML = `
     <div class="end-screen">
-      <div class="emoji">${emoji}</div>
+      ${petriHTML(Math.max(1, Math.round(pct / 10)))}
       <h2>${msg}</h2>
       <div class="score-big">${score} / ${gradedCount}</div>
       <div class="stats-row">
         <div class="stat-chip"><div class="num">${pct}%</div><div class="label">Aciertos</div></div>
         <div class="stat-chip"><div class="num">${questions.length}</div><div class="label">Preguntas</div></div>
       </div>
-      <button class="btn" onclick="startQuiz()">Intentar de nuevo 🔁</button>
+      <button class="btn" onclick="startQuiz()">Intentar de nuevo</button>
     </div>
     <div class="review-list">
-      <h2 class="question" style="margin-top:24px;">📋 Revisión completa</h2>
+      <h2 class="question" style="margin-top:24px;">Revisión completa</h2>
       ${reviewHtml}
     </div>
   `;
@@ -603,7 +674,7 @@ function renderEnd() {
 }
 
 function launchConfettiBurst(count) {
-  const colors = ['#ff5da2', '#7c3aed', '#2563eb', '#06b6d4', '#16a34a', '#f59e0b'];
+  const colors = ['#6c3fb5', '#e0457e', '#d99a2b', '#1c8f92', '#1f9d63', '#4c2a86'];
   const n = count || 14;
   for (let i = 0; i < n; i++) {
     const piece = document.createElement('div');
